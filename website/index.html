@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klinxlate Soap Store</title>
+
+<style>
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4fff9;
+}
+
+header{
+background:#1a936f;
+color:white;
+text-align:center;
+}
+
+header img{
+width:100%;
+max-height:220px;
+object-fit:cover;
+}
+
+.logo{
+font-size:28px;
+font-weight:bold;
+padding:10px;
+}
+
+nav{
+padding-bottom:10px;
+}
+
+nav a{
+color:white;
+margin:10px;
+text-decoration:none;
+font-weight:bold;
+}
+
+.page{
+display:none;
+padding:25px;
+}
+
+.active{
+display:block;
+}
+
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.product{
+background:white;
+padding:15px;
+border-radius:10px;
+text-align:center;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.product img{
+width:100%;
+border-radius:10px;
+margin:10px 0;
+}
+
+button{
+background:#1a936f;
+color:white;
+border:none;
+padding:10px;
+border-radius:5px;
+cursor:pointer;
+}
+
+button:hover{
+background:#147a5c;
+}
+
+.cart-item,.checkout-item{
+background:white;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+display:flex;
+justify-content:space-between;
+}
+
+.total{
+font-size:20px;
+font-weight:bold;
+margin-top:15px;
+}
+
+.pay-box{
+background:white;
+padding:15px;
+border-radius:8px;
+margin-top:10px;
+}
+
+input{
+padding:8px;
+margin:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=1350&q=80">
+
+<div class="logo">Klinxlate Soap Store</div>
+
+<nav>
+<a href="#" onclick="showPage('shop')">Shop</a>
+<a href="#" onclick="showPage('cart')">Cart (<span id="cart-count">0</span>)</a>
+<a href="#" onclick="showPage('checkout')">Checkout</a>
+<a href="#" onclick="showPage('payment')">Payment</a>
+</nav>
+
+</header>
+
+<!-- SHOP PAGE -->
+
+<div id="shop" class="page active">
+
+<h2>Our Soaps</h2>
+
+<div class="products">
+
+<div class="product">
+<h3>Shea Butter Soap</h3>
+<img src="OIP.webp">
+<p>$5</p>
+<button onclick="addToCart('Shea Butter Soap',5)">Add to Cart</button>
+</div>
+
+<div class="product">
+<h3>Aloe Vera Soap</h3>
+<img src="download (3).webp">
+<p>$4</p>
+<button onclick="addToCart('Aloe Vera Soap',4)">Add to Cart</button>
+</div>
+
+<div class="product">
+<h3>Lemon Soap</h3>
+<img src="https://images.unsplash.com/photo-1610557892470-55d9e80c5c1d?auto=format&fit=crop&w=400&q=80">
+<p>$4</p>
+<button onclick="addToCart('Lemon Soap',4)">Add to Cart</button>
+</div>
+
+<div class="product">
+<h3>Charcoal Soap</h3>
+<img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80">
+<p>$6</p>
+<button onclick="addToCart('Charcoal Soap',6)">Add to Cart</button>
+</div>
+
+</div>
+</div>
+
+<!-- CART PAGE -->
+
+<div id="cart" class="page">
+
+<h2>Your Cart</h2>
+
+<div id="cart-items"></div>
+
+<div class="total">
+Total: $<span id="total">0</span>
+</div>
+
+<button onclick="showPage('checkout')">Go to Checkout</button>
+
+</div>
+
+<!-- CHECKOUT PAGE -->
+
+<div id="checkout" class="page">
+
+<h2>Checkout</h2>
+
+<div id="checkout-items"></div>
+
+<div class="total">
+Total: $<span id="checkout-total">0</span>
+</div>
+
+<button onclick="showPage('payment')">Proceed to Payment</button>
+
+</div>
+
+<!-- PAYMENT PAGE -->
+
+<div id="payment" class="page">
+
+<h2>Place Your Order</h2>
+
+<h3>Total: $<span id="payment-total">0</span></h3>
+
+<h3>Select Payment Method</h3>
+
+<label>
+<input type="radio" name="pay" value="mtn"> MTN Mobile Money
+</label>
+<br><br>
+
+<label>
+<input type="radio" name="pay" value="paypal"> PayPal
+</label>
+<br><br>
+
+<label>
+<input type="radio" name="pay" value="card"> Credit / Debit Card
+</label>
+
+<div id="mtn" class="pay-box" style="display:none;">
+<p>Enter MTN number</p>
+<input placeholder="0551234567">
+</div>
+
+<div id="paypal" class="pay-box" style="display:none;">
+<p>You will be redirected to PayPal to complete payment.</p>
+</div>
+
+<div id="card" class="pay-box" style="display:none;">
+<input placeholder="Card Number"><br>
+<input placeholder="Expiry Date"><br>
+<input placeholder="CVV">
+</div>
+
+<br>
+
+<button onclick="placeOrder()">Place Order</button>
+
+</div>
+
+<script>
+
+let cart = [];
+
+function showPage(page){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active");
+});
+
+document.getElementById(page).classList.add("active");
+
+if(page==="cart") displayCart();
+if(page==="checkout") displayCheckout();
+if(page==="payment") displayPayment();
+
+}
+
+function addToCart(name,price){
+cart.push({name,price});
+document.getElementById("cart-count").innerText = cart.length;
+}
+
+function displayCart(){
+
+let box = document.getElementById("cart-items");
+box.innerHTML="";
+let total=0;
+
+cart.forEach((item,i)=>{
+total+=item.price;
+
+box.innerHTML+=`
+<div class="cart-item">
+${item.name} - $${item.price}
+<button onclick="removeItem(${i})">Remove</button>
+</div>
+`;
+});
+
+document.getElementById("total").innerText=total;
+
+}
+
+function removeItem(i){
+cart.splice(i,1);
+document.getElementById("cart-count").innerText=cart.length;
+displayCart();
+}
+
+function displayCheckout(){
+
+let box=document.getElementById("checkout-items");
+box.innerHTML="";
+let total=0;
+
+cart.forEach(item=>{
+total+=item.price;
+box.innerHTML+=`<div class="checkout-item">${item.name} - $${item.price}</div>`;
+});
+
+document.getElementById("checkout-total").innerText=total;
+
+}
+
+function displayPayment(){
+let total=cart.reduce((sum,i)=>sum+i.price,0);
+document.getElementById("payment-total").innerText=total;
+}
+
+document.querySelectorAll("input[name='pay']").forEach(r=>{
+r.addEventListener("change",function(){
+
+document.getElementById("mtn").style.display="none";
+document.getElementById("paypal").style.display="none";
+document.getElementById("card").style.display="none";
+
+document.getElementById(this.value).style.display="block";
+
+});
+});
+
+function placeOrder(){
+
+if(cart.length===0){
+alert("Cart is empty");
+return;
+}
+
+alert("Order placed successfully! Thank you for shopping at Klinxlate.");
+
+cart=[];
+document.getElementById("cart-count").innerText=0;
+
+showPage("shop");
+
+}
+
+function placeOrder(){
+
+if(cart.length===0){
+alert("Cart is empty");
+return;
+}
+
+let method = document.querySelector("input[name='pay']:checked");
+
+if(!method){
+alert("Please select a payment method");
+return;
+}
+
+if(method.value === "mtn"){
+window.location.href = "https://momo.mtn.com/";
+}
+
+if(method.value === "paypal"){
+window.location.href = "https://www.paypal.com/checkout";
+}
+
+if(method.value === "card"){
+window.location.href = "https://stripe.com/payments";
+}
+
+}
+function placeOrder(){
+
+if(cart.length===0){
+alert("Cart is empty");
+return;
+}
+
+let total = cart.reduce((sum,i)=>sum+i.price,0);
+
+let items = cart.map(i => i.name + " - $" + i.price).join("%0A");
+
+let message = "Hello Klinxlate, I want to order:%0A%0A" + items + "%0A%0ATotal: $" + total + "%0A%0APlease send payment instructions.";
+
+let phone = "233243444145"; 
+
+window.open("https://wa.me/" + phone + "?text=" + message);
+
+}
+
+</script>
+
+</body>
+</html>
